@@ -5,24 +5,24 @@ import "./App.css";
 
 function App() {
   const [movies, setMovies] = useState([]);
+  const [isLoading, setLoading] = useState(false);
 
-  const fetchMovieHandler = () => {
-    fetch("https://swapi.dev/api/films/")
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        const transformedMovie = data.results.map((value) => {
-          return {
-            id: value.episode_id,
-            title: value.title,
-            openingText: value.opening_crawl,
-            releaseDate: value.release_date,
-          };
-        });
-        setMovies(transformedMovie);
-      });
-  };
+  async function fetchMovieHandler() {
+    setLoading(true);
+    const response = await fetch("https://swapi.dev/api/films/");
+    const data = await response.json();
+
+    const transformedMovie = data.results.map((value) => {
+      return {
+        id: value.episode_id,
+        title: value.title,
+        openingText: value.opening_crawl,
+        releaseDate: value.release_date,
+      };
+    });
+    setMovies(transformedMovie);
+    setLoading(false);
+  }
 
   return (
     <React.Fragment>
@@ -30,7 +30,9 @@ function App() {
         <button onClick={fetchMovieHandler}>Fetch Movies</button>
       </section>
       <section>
-        <MoviesList movies={movies} />
+        {!isLoading && movies.length > 0 && <MoviesList movies={movies} />}
+        {!isLoading && movies.length === 0 && <p>Found no movies.</p>}
+        {isLoading && <p>Loading...</p>}
       </section>
     </React.Fragment>
   );
